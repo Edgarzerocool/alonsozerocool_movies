@@ -1,6 +1,12 @@
 # alonsozerocoolmovies
 
-A new Flutter application aplicación demostración para probar api de peliculas
+A new Flutter application aplicación demostración para probar api de peliculas, se utilizo la api de https://www.themoviedb.org/ en el que puedes crear una cuenta gratuita para poder utilizar su  api
+
+la version de flutter :  v1.12.13+hotfix.5
+
+para generar los modelos de datos para las respuestas de los servicios utilize https://javiercbk.github.io/json_to_dart/ solo agrege la clases al proyecto
+
+
 
 ## Getting Started
 
