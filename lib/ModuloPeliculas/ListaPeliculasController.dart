@@ -15,12 +15,15 @@ class ListaPeliculasController extends StatefulWidget {
   }
 
 class ListaPeliculasControllerState extends State<ListaPeliculasController>
+    with WidgetsBindingObserver
     implements ListaPeliculasView {
   ListaPeliculasPresenter presenter;
   String tipoLista;
 
-  /*static popular listaPeliculasPopulares;
-  nowplaying listaPeliculasMasVistas;*/
+  var listaPeliculasPopulares;
+  var listaPeliculasMasVistas;
+  bool finalizoServicio = false;
+  ScrollController scroll = ScrollController();
 
   ListaPeliculasControllerState(String tipoLista){
     this.presenter = ListaPeliculasPresenter(this);
@@ -29,23 +32,46 @@ class ListaPeliculasControllerState extends State<ListaPeliculasController>
 
   @override
   void iniState(){
+    WidgetsBinding.instance.addObserver(this);
+    recuperarListaPeliculas();
     super.initState();
-    didChangeDependencies();
+  }
+
+  recuperarListaPeliculas() async {
+    if(tipoLista == "Populares"){
+      listaPeliculasPopulares = await presenter.getListaPeliculasPopulares();
+    }else{
+      listaPeliculasMasVistas = await presenter.getListaPeliculasMasVistas();
+    }
+    if(listaPeliculasMasVistas != null || listaPeliculasPopulares != null){
+      setState(() {
+        finalizoServicio = true;
+      });
+    }
+  }
+
+  Widget loading(){
+    return Center(
+      child: Text("sin datos"),
+    );
+  }
+
+  Widget vistaListaPeliculas(){
+    ListView.builder(
+      itemCount: listaPeliculasMasVistas.results.length,
+      itemBuilder: (context, index) {
+        return ListTile(
+          title: Text(listaPeliculasMasVistas.result[index].title),
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
-    var listaPeliculasPopulares;
-    var listaPeliculasMasVistas;
-    if(tipoLista == "Populares"){
-      Future.delayed(Duration.zero, () {
-         listaPeliculasPopulares = presenter.getListaPeliculasPopulares();
-      });
-    }else{
-      Future.delayed(Duration.zero, () {
-         listaPeliculasMasVistas = presenter.getListaPeliculasMasVistas();
-      });
+    if(!finalizoServicio){
+      recuperarListaPeliculas();
     }
     return Scaffold(
       appBar: AppBar(
@@ -53,38 +79,7 @@ class ListaPeliculasControllerState extends State<ListaPeliculasController>
         // the App.build method, and use it to set our appbar title.
         title: Text("Lista de peliculas "+ tipoLista),
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'Lista de peliculas:',
-            ),
-            ListView.builder(
-              itemCount: listaPeliculasMasVistas.totalResults,
-                itemBuilder: (context, index){
-                  return Text(listaPeliculasMasVistas.results[index].title);
-                }
-            ),
-          ],
-        ),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      body: finalizoServicio ? vistaListaPeliculas() : loading(), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
   
