@@ -20,8 +20,9 @@ class ListaPeliculasControllerState extends State<ListaPeliculasController>
   ListaPeliculasPresenter presenter;
   String tipoLista;
 
-  var listaPeliculasPopulares;
-  var listaPeliculasMasVistas;
+  popular listaPeliculasPopulares;
+  nowplaying listaPeliculasMasVistas;
+  var lista;
   bool finalizoServicio = false;
   ScrollController scroll = ScrollController();
 
@@ -40,10 +41,12 @@ class ListaPeliculasControllerState extends State<ListaPeliculasController>
   recuperarListaPeliculas() async {
     if(tipoLista == "Populares"){
       listaPeliculasPopulares = await presenter.getListaPeliculasPopulares();
+      lista = listaPeliculasPopulares;
     }else{
       listaPeliculasMasVistas = await presenter.getListaPeliculasMasVistas();
+      lista = listaPeliculasMasVistas;
     }
-    if(listaPeliculasMasVistas != null || listaPeliculasPopulares != null){
+    if(lista != null){
       setState(() {
         finalizoServicio = true;
       });
@@ -57,13 +60,13 @@ class ListaPeliculasControllerState extends State<ListaPeliculasController>
   }
 
   Widget vistaListaPeliculas(){
-    ListView.builder(
-      itemCount: listaPeliculasMasVistas.results.length,
-      itemBuilder: (context, index) {
-        return ListTile(
-          title: Text(listaPeliculasMasVistas.result[index].title),
-        );
-      },
+    return Container(
+      child: ListView.builder(
+        itemCount: lista.results.length,
+        itemBuilder: (context, index) {
+          return Text(lista.results[index].title);
+        },
+      ),
     );
   }
 
